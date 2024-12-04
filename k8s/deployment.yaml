@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fun-food-times-order-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fun-food-times-order-management
+  template:
+    metadata:
+      labels:
+        app: fun-food-times-order-management
+    spec:
+      containers:
+        - image: order_management:latest
+          name: fun-food-times-order-management
+          ports:
+            - containerPort: 80
+              name: server
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: server
+            initialDelaySeconds: 20
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: server
+            initialDelaySeconds: 20
+            periodSeconds: 3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fun-food-times-order-management
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: server
+  selector:
+    app: fun-food-times-order-management
