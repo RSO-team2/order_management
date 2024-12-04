@@ -22,6 +22,11 @@ jobs:
    steps:
     - name: Checkout master
       uses: actions/checkout@main
+
+    - name: Activate Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
       
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
