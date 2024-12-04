@@ -39,7 +39,7 @@ jobs:
       run: docker build -t ${{ secrets.REGISTRY_NAME }}/order_management:$(echo $GITHUB_SHA | head -c7) .
     
     - name: Log in to DigitalOcean Container Registry with short-lived credentials
-      run: doctl registry login --expiry-seconds 1200
+      run: doctl registry login --expiry-seconds 1800
     
     - name: Push image to DigitalOcean Container Registry
       run: docker push ${{ secrets.REGISTRY_NAME }}/order_management:$(echo $GITHUB_SHA | head -c7)
@@ -48,7 +48,7 @@ jobs:
       run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{ secrets.REGISTRY_NAME }}/order_management:'${TAG}'|' $GITHUB_WORKSPACE/k8s/deployment.yaml
     
     - name: Save DigitalOcean kubeconfig with short-lived credentials
-      run: doctl kubernetes cluster kubeconfig save --expiry-seconds 1200 ${{ secrets.CLUSTER_NAME }}
+      run: doctl kubernetes cluster kubeconfig save --expiry-seconds 1800 ${{ secrets.CLUSTER_NAME }}
     
     - name: Deploy to DigitalOcean Kubernetes
       run: kubectl apply -f $GITHUB_WORKSPACE/k8s/deployment.yaml
