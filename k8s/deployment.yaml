@@ -13,7 +13,7 @@ spec:
         app: fun-food-times-order-management
     spec:
       containers:
-        - image: order_management
+        - image: <IMAGE>
           name: fun-food-times-order-management
           ports:
             - containerPort: 80
