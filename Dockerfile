@@ -9,7 +9,7 @@ ADD . ./
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
-RUN python3 ./setup.py
+RUN ["python3", "./setup.py"]
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
@@ -18,4 +18,4 @@ EXPOSE 80
 ENV NAME=Order-Management
 
 # Run app.py when the container launches
-CMD python3 ./api/app.py
+CMD ["python3", "./api/app.py"]
