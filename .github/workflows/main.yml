@@ -18,7 +18,7 @@ on:
     
 jobs:
  build:
-   runs-on: python:3.11-buster
+   runs-on: ubuntu-latest
    steps:
     - name: Checkout master
       uses: actions/checkout@main
