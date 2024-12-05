@@ -34,12 +34,6 @@ jobs:
       uses: digitalocean/action-doctl@v2
       with:
         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-    - name: Create Kubernetes Secret
-      run: |
-          kubectl create secret generic database-url-secret \
-          --from-literal=DATABASE_URL=${{ secrets.DATABASE_URL }} --dry-run=client \
-          --output yaml | kubectl apply -f - --insecure-skip-tls-verify --validate=false
         
     - name: Build container image
       run: docker build -t ${{ secrets.REGISTRY_NAME }}/order_management:$(echo $GITHUB_SHA | head -c7) .
@@ -55,6 +49,12 @@ jobs:
     
     - name: Save DigitalOcean kubeconfig with short-lived credentials
       run: doctl kubernetes cluster kubeconfig save --expiry-seconds 1800 ${{ secrets.CLUSTER_NAME }}
+
+    - name: Create Kubernetes Secret
+      run: |
+          kubectl create secret generic database-url-secret \
+          --from-literal=DATABASE_URL=${{ secrets.DATABASE_URL }} --dry-run=client \
+          --output yaml | kubectl apply -f - --insecure-skip-tls-verify --validate=false
     
     - name: Deploy to DigitalOcean Kubernetes
       run: kubectl apply -f $GITHUB_WORKSPACE/k8s/deployment.yaml
