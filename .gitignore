@@ -2,3 +2,4 @@
 *.crt
 *.config
 .env
+fun-food-times-container-kubeconfig.yaml

@@ -23,12 +23,7 @@ spec:
         - image: <IMAGE>
           name: fun-food-times-order-management
           ports:
-            - containerPort: 8080
-          resources:
-            requests:
-              cpu: 100m
-            limits:
-              cpu: 100m
+            - containerPort: 5000
 
 ---
 
@@ -40,8 +35,8 @@ spec:
   type: LoadBalancer
   ports:
     - name: http
-      port: 8080
+      port: 5000
       protocol: TCP
-      targetPort: 8080
+      targetPort: 5000
   selector:
     app: fun-food-times-order-management

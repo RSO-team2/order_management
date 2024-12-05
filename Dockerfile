@@ -2,16 +2,16 @@
 FROM python
 
 # Set the working directory to /app
-WORKDIR ./
+WORKDIR /api
 
 # Copy the current directory contents into the container at /app
-ADD . ./
+ADD . /api
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
 
 # Make port 80 available to the world outside this container
-EXPOSE 8080
+EXPOSE 5000
 
 # Run app.py when the container launches
-CMD ["python3", "./api/app.py"]
+CMD ["python", "app.py"]
