@@ -6,6 +6,16 @@ app = Flask(__name__)
 
 @app.route("/new_order", methods=["POST"])
 def new_order():
+    """
+    Create a new order in the order management system.
+    This function establishes a connection to the database, retrieves order data from the request,
+    validates the data, and if valid, inserts the order into the database with the current date and
+    a status of 1. The connection is then committed and closed.
+    Returns:
+        Response: A JSON response indicating the success or failure of the operation.
+        - On success: {"message": "success, order '<order_id>' saved", "status": 200}
+        - On failure: {"message": "invalid data - <error_message>", "status": 400}
+    """
     conn, cursor = ep.make_connection()
     data = request.get_json()
 
@@ -25,6 +35,15 @@ def new_order():
 
 @app.route("/get_user_orders", methods=["GET"])
 def get_user_orders():
+    """
+    Retrieve orders for a specific customer.
+    This function establishes a database connection, retrieves the customer ID from the request arguments,
+    validates the customer ID, fetches the orders for the customer from the database, and returns the orders
+    in a JSON response.
+    Returns:
+        Response: A JSON response containing the message, status, and data (orders) if the customer ID is valid.
+                  If the customer ID is invalid, returns a JSON response with an error message and status 400.
+    """
     conn, cursor = ep.make_connection()
     customer_id = request.args.get("customer_id")
 
