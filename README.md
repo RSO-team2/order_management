@@ -22,7 +22,7 @@ In order to develop and run this use-case, you have to do the following:
 - Clone this repository
 - Install the required Python packages using the following command: `pip install -r requirements.txt`
 - A Digital Ocean account
-- A Postgres Managed Database on Digital Ocean
+- A Postgres Managed Database on Digital Ocean (add it's URL to your local `.env` file under the key `DATABASE_URL`).
 - For a basic understanding of the deployment process please refer to the following documentation of Digital Ocean:
     - [Build and Deploy Your First Image to Your First Cluster](https://docs.digitalocean.com/products/kubernetes/getting-started/deploy-image-to-cluster/)
     - [Set up CI/CD using GitHub Actions](https://docs.digitalocean.com/products/container-registry/how-to/enable-push-to-deploy/)
