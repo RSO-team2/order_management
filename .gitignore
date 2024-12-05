@@ -2,3 +2,4 @@
 *.crt
 *.config
 .env
+__pycache__
