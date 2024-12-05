@@ -8,15 +8,6 @@ on:
       - 'setup.py'
       - 'Dockerfile'
       - '.github/workflows/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'api/**'
-      - 'k8s/**'
-      - 'setup.py'
-      - 'Dockerfile'
-      - '.github/workflows/**'
     
 jobs:
  build:
