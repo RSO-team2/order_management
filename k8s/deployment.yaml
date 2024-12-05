@@ -24,6 +24,12 @@ spec:
           name: fun-food-times-order-management
           ports:
             - containerPort: 5000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: database-url-secret
+                  key: DATABASE_URL
 
 ---
 
