@@ -32,7 +32,6 @@ spec:
                   key: DATABASE_URL
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
