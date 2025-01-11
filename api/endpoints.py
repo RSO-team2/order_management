@@ -93,6 +93,17 @@ def get_user_orders(cursor, customer_id):
     return orders
 
 
+def get_restaurant_orders(cursor, restaurant_id):
+    cursor.execute(
+        """
+        SELECT * FROM orders WHERE restaurant_id = %s;
+        """,
+        (restaurant_id,),
+    )
+    orders = cursor.fetchall()
+    return orders
+
+
 def commit_and_close(conn, cursor):
     """
     Commits the current transaction, closes the cursor, and closes the connection.
