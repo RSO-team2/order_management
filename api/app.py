@@ -80,7 +80,7 @@ def get_user_orders():
 
 @app.get("/get_restaurant_orders")
 @cross_origin()
-def get_user_orders():
+def get_restaurant_orders():
     conn, cursor = ep.make_connection()
     restaurant_id = request.args.get("restaurant_id")
 
