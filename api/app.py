@@ -2,10 +2,16 @@ import endpoints as ep
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 import requests
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 cors = CORS(app)
 
+# Attach Prometheus metrics to the Flask app
+metrics = PrometheusMetrics(app)
+
+# Automatically collect standard metrics like request count, response duration, and more
+metrics.info('app_info', 'Restaurant Management API Info', version='1.0.0')
 
 @app.route("/health")
 def health_check():
