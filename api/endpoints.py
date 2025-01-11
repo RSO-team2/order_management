@@ -53,12 +53,10 @@ def vaildate_order_data(data):
         return {"result": False, "error": "invalid customer id"}
     if not data.get("total_amount") or not isinstance(data.get("total_amount"), float):
         return {"result": False, "error": "invalid total price"}
-    if not data.get("delivery_address") or not isinstance(
-        data.get("delivery_address"), str
-    ):
+    if not data.get("delivery_address"):
         return {
             "result": False,
-            "error": "invalid delivery address",
+            "error": "delivery address not provided",
         }  # TODO: Read address from user database here if required
     return {"result": True}
 

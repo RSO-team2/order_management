@@ -1,7 +1,10 @@
 import endpoints as ep
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
+import requests
 
 app = Flask(__name__)
+cors = CORS(app)
 
 @app.route('/health')
 def health_check():
@@ -11,7 +14,8 @@ def health_check():
     except:
         return "Service is unhealthy", 500
 
-@app.route("/new_order", methods=["POST"])
+@app.post("/new_order")
+@cross_origin()
 def new_order():
     """
     Create a new order in the order management system.
@@ -34,13 +38,19 @@ def new_order():
     
     data["order_date"] = ep.get_current_date()
     data["status"] = 1
+    if (data["delivery_address"]["parse"]):
+        user_address_data = requests.get(f"https://faas-nyc1-2ef2e6cc.doserverless.co/api/v1/web/fn-3c231b12-5667-4f1f-b506-1603f4fce4a5/sample/hello?ip={data['delivery_address']['value']}").json()
+        data["delivery_address"] = f"lat: {user_address_data['latitude']}, long: {user_address_data['longitude']}"
+    else:
+        data["delivery_address"] = data["delivery_address"]["value"]
     order_id = ep.insert_order(cursor, data)
     ep.commit_and_close(conn, cursor)
 
     return jsonify({"message": f"success, order '{order_id}' saved", "status": 200})
 
 
-@app.route("/get_user_orders", methods=["GET"])
+@app.get("/get_user_orders")
+@cross_origin()
 def get_user_orders():
     """
     Retrieve orders for a specific customer.
