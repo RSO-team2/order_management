@@ -30,12 +30,6 @@ def new_order():
     """
     conn, cursor = ep.make_connection()
     data = request.get_json()
-
-    valid_data = ep.vaildate_order_data(data)
-    if not valid_data["result"]:
-        return jsonify(
-            {"message": f"invalid data - {valid_data['error']}", "status": 400}
-        )
     
     data["order_date"] = ep.get_current_date()
     data["status"] = 1
