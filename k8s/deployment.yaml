@@ -37,7 +37,7 @@ spec:
               port: 5001
             initialDelaySeconds: 5
             periodSeconds: 10
-            failureThreshold: 
+            failureThreshold: 3
           env:
             - name: DATABASE_URL
               valueFrom:
