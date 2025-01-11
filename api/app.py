@@ -30,10 +30,8 @@ def new_order():
     """
     conn, cursor = ep.make_connection()
     data = request.get_json()
-    app.logger.info(f"Received data: {data}")
 
     valid_data = ep.vaildate_order_data(data)
-    app.logger.info(f"Valid data: {valid_data}")
     if not valid_data["result"]:
         return jsonify(
             {"message": f"invalid data - {valid_data['error']}", "status": 400}
@@ -46,11 +44,8 @@ def new_order():
         data["delivery_address"] = f"lat: {user_address_data['latitude']}, long: {user_address_data['longitude']}"
     else:
         data["delivery_address"] = data["delivery_address"]["value"]
-    app.logger.info(f"Data with date and status: {data}")
     order_id = ep.insert_order(cursor, data)
-    app.logger.info(f"Order ID: {order_id}")
     ep.commit_and_close(conn, cursor)
-    app.logger.info("Connection closed")
     return jsonify({"message": f"success, order '{order_id}' saved", "status": 200})
 
 

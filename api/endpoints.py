@@ -104,7 +104,7 @@ def insert_order(cursor, data):
             data["items"],
             data["restaurant_id"],
             data["status"],
-            data["delivery_address"],
+            data["delivery_address"]
         ),
     )
     order_id = cursor.fetchone()[0]
