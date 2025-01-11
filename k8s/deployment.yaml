@@ -24,6 +24,20 @@ spec:
           name: fun-food-times-order-management
           ports:
             - containerPort: 5001
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 
           env:
             - name: DATABASE_URL
               valueFrom:

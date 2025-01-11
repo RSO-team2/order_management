@@ -3,6 +3,13 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
+@app.route('/health')
+def health_check():
+    try:
+        ep.check_database_connection()
+        return "Service is healthy", 200
+    except:
+        return "Service is unhealthy", 500
 
 @app.route("/new_order", methods=["POST"])
 def new_order():

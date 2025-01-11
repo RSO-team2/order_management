@@ -145,3 +145,14 @@ def commit_and_close(conn, cursor):
     conn.commit()
     cursor.close()
     conn.close()
+
+def check_database_connection():
+    try:
+        # Connect to your PostgreSQL database
+        connection = psycopg2.connect(os.getenv("DATABASE_URL"))
+        cursor = connection.cursor()
+        cursor.execute('SELECT 1')  # Simple query to check if the database is responsive
+        connection.close()
+        print("Database is connected!")
+    except OperationalError as err:
+        raise Exception("Database is not reachable: " + str(err))
