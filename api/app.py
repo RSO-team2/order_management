@@ -2,12 +2,10 @@ import endpoints as ep
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 import requests
-import logging
 
 app = Flask(__name__)
 cors = CORS(app)
 
-logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/health')
 def health_check():
@@ -32,10 +30,10 @@ def new_order():
     """
     conn, cursor = ep.make_connection()
     data = request.get_json()
-    logging.debug(f"Received data: {data}")
+    app.logger.info(f"Received data: {data}")
 
     valid_data = ep.vaildate_order_data(data)
-    logging.debug(f"Valid data: {valid_data}")
+    app.logger.info(f"Valid data: {valid_data}")
     if not valid_data["result"]:
         return jsonify(
             {"message": f"invalid data - {valid_data['error']}", "status": 400}
@@ -48,11 +46,11 @@ def new_order():
         data["delivery_address"] = f"lat: {user_address_data['latitude']}, long: {user_address_data['longitude']}"
     else:
         data["delivery_address"] = data["delivery_address"]["value"]
-    logging.debug(f"Data with date and status: {data}")
+    app.logger.info(f"Data with date and status: {data}")
     order_id = ep.insert_order(cursor, data)
-    logging.debug(f"Order ID: {order_id}")
+    app.logger.info(f"Order ID: {order_id}")
     ep.commit_and_close(conn, cursor)
-    logging.debug("Connection closed")
+    app.logger.info("Connection closed")
     return jsonify({"message": f"success, order '{order_id}' saved", "status": 200})
 
 
