@@ -24,7 +24,44 @@ class TestOrderAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.data.decode(), "Service is unhealthy")
 
-    
+    @patch('endpoints.make_connection')
+    @patch('endpoints.get_current_date')
+    @patch('requests.get')
+    @patch('endpoints.send_initial_email')
+    def test_new_order_success(self, mock_send_email, mock_requests, mock_date, mock_conn):
+        # Mock database connection
+        mock_cursor = MagicMock()
+        mock_cursor.fetchone.return_value = (1,)  # Return order_id
+        mock_conn.return_value = (MagicMock(), mock_cursor)
+        
+        # Mock current date
+        mock_date.return_value = "01/01/2024 12:00:00"
+        
+        # Mock geolocation API response
+        mock_requests.return_value.json.return_value = {
+            "latitude": "46.0",
+            "longitude": "14.0"
+        }
+
+        test_data = {
+            "customer_id": 1,
+            "total_amount": 25.50,
+            "items": json.dumps([{"id": 1, "quantity": 2}]),
+            "restaurant_id": 1,
+            "delivery_address": {
+                "parse": True,
+                "value": "192.168.1.1"
+            }
+        }
+
+        response = self.app.post('/new_order',
+                               json=test_data,
+                               content_type='application/json')
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.data)
+        self.assertEqual(response_data["message"], "success, order '1' saved")
+
     @patch('endpoints.make_connection')
     def test_get_user_orders_success(self, mock_conn):
         # Mock database connection
