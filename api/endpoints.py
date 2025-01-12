@@ -153,7 +153,7 @@ def send_initial_email(customer_id, restaurant_id):
     )
 
     requests.get(
-        f"{os.getenv('SMTP_ENDPOINT')}?email={customer_email}&status={restaurant_name} je prejelo Vaše naročilo!",
+        f"{os.getenv('SMTP_API')}?email={customer_email}&status={restaurant_name} je prejelo Vaše naročilo!",
         headers={"Content-Type": "application/json"}
     )
 
