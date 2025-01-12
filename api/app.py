@@ -21,6 +21,12 @@ metrics.info('app_info', 'Restaurant Management API Info', version='1.0.0')
 
 @app.route("/health")
 def health_check():
+    """
+    Health check endpoint to verify the service status.
+    Returns:
+        - "Service is healthy" with status code 200 if the database connection is successful.
+        - "Service is unhealthy" with status code 500 if the database connection fails.
+    """
     try:
         ep.check_database_connection()
         return "Service is healthy", 200
@@ -96,6 +102,13 @@ def get_user_orders():
 @app.get("/get_restaurant_orders")
 @cross_origin()
 def get_restaurant_orders():
+    """
+    Retrieve orders for a specific restaurant.
+    Fetches restaurant orders from the database based on the provided restaurant ID.
+    Returns:
+        - Success: JSON response with a list of orders, status 200.
+        - Failure: {"message": "invalid restaurant id", "status": 400} if the ID is invalid.
+    """
     conn, cursor = ep.make_connection()
     restaurant_id = request.args.get("restaurant_id")
 
@@ -117,6 +130,13 @@ def get_restaurant_orders():
 @app.post("/update_order_status")
 @cross_origin()
 def update_order_status():
+    """
+    Update the status of an order.
+    Updates the order status in the database and sends an update email notification.
+    Returns:
+        - Success: {"message": "order '<order_id>' updated to '<status>'"} with status 200.
+        - Failure: {"message": "invalid order id", "status": 400} if the order ID or status is invalid.
+    """
     conn, cursor = ep.make_connection()
     data = request.get_json()
     order_id = data["order_id"]
