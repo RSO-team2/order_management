@@ -99,6 +99,23 @@ def get_restaurant_orders():
     )
 
 
+@app.post("/update_order_status")
+@cross_origin()
+def update_order_status():
+    conn, cursor = ep.make_connection()
+    data = request.get_json()
+    order_id = data["order_id"]
+    status = data["status"]
+
+    if not order_id or not order_id.isdigit():
+        return jsonify({"message": "invalid order id", "status": 400})
+    
+    ep.update_order_status(cursor, int(order_id), int(status))
+    ep.commit_and_close(conn, cursor)
+
+    return jsonify({"message": f"order '{order_id}' updated to '{status}'"})
+
+
 if __name__ == "__main__":
     print("Starting app...")
     app.run(host="0.0.0.0", port=5001)

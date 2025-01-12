@@ -104,6 +104,22 @@ def get_restaurant_orders(cursor, restaurant_id):
     return orders
 
 
+def update_order_status(cursor, order_id, status):
+    """
+    Update the status of an order in the database.
+    Args:
+        cursor (object): Database cursor object used to execute SQL queries.
+        order_id (int): The ID of the order to be updated.
+        status (str): The new status to be assigned to the order.
+    """
+    cursor.execute(
+        """
+        UPDATE orders SET status = %s WHERE id = %s;
+        """,
+        (status, order_id),
+    )
+
+
 def commit_and_close(conn, cursor):
     """
     Commits the current transaction, closes the cursor, and closes the connection.
