@@ -161,7 +161,7 @@ def send_initial_email(customer_id, restaurant_id):
 def send_update_email(cursor, order_id, status):
     cursor.execute(
         """
-        SELECT * FROM orders WHERE order_id = %s;
+        SELECT * FROM orders WHERE id = %s;
         """,
         (order_id,),
     )
