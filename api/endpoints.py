@@ -137,7 +137,7 @@ def send_initial_email(customer_id, restaurant_id):
         headers={"Content-Type": "application/json"}
     )
     customer_data = response.json()
-    customer_email = customer_data["email"]
+    customer_email = customer_data["user_email"]
 
     response = requests.get(
         f"{os.getenv('RESTAURANT_ENDPOINT')}/api/get_restaurants",
