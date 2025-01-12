@@ -13,10 +13,8 @@ import os
 app = Flask(__name__)
 cors = CORS(app)
 
-# Attach Prometheus metrics to the Flask app
 metrics = PrometheusMetrics(app)
 
-# Automatically collect standard metrics like request count, response duration, and more
 metrics.info('app_info', 'Restaurant Management API Info', version='1.0.0')
 
 @app.route("/health")
