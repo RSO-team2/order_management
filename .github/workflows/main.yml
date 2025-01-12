@@ -71,6 +71,12 @@ jobs:
           --from-literal=AUTH_ENDPOINT=${{ secrets.AUTH_ENDPOINT }} --dry-run=client \
           --output yaml | kubectl apply -f - --insecure-skip-tls-verify --validate=false
 
+      - name: Create Kubernetes Auth Endpoint Secret
+        run: |
+          kubectl create secret generic distance-api-secret \
+          --from-literal=DISTANCE_API=${{ secrets.DISTANCE_API }} --dry-run=client \
+          --output yaml | kubectl apply -f - --insecure-skip-tls-verify --validate=false
+
       - name: Deploy to DigitalOcean Kubernetes
         run: kubectl apply -f $GITHUB_WORKSPACE/k8s/deployment.yaml
 

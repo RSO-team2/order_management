@@ -195,12 +195,23 @@ def send_update_email(cursor, order_id, status):
         """,
         (status,),
     )
-    status = cursor.fetchone()[1]
+    status_text = cursor.fetchone()[1]
 
-    requests.get(
-        f"{os.getenv('SMTP_API')}?email={customer_email}&status=Status naročila pri restavraciji {restaurant[1]} je '{status}'!",
-        headers={"Content-Type": "application/json"},
-    )
+    if status != 3:
+        requests.get(
+            f"{os.getenv('SMTP_API')}?email={customer_email}&status=Status naročila pri restavraciji {restaurant[1]} je '{status_text}'!",
+            headers={"Content-Type": "application/json"},
+        )
+    else:
+        response = requests.get(
+            f"{os.getenv('DISTANCE_API')}?origin={restaurant[4]}&destination={order[7]}",
+            headers={"Content-Type": "application/json"},
+        )
+        distance_data = response.json()
+        requests.get(
+            f"{os.getenv('SMTP_API')}?email={customer_email}&status=Status naročila pri restavraciji {restaurant[1]} je '{status_text}'!\nYour delivery is {distance_data["duration"]} away and will arrive after travveling {distance_data["distance"]}!",
+            headers={"Content-Type": "application/json"},
+        )
 
 
 def commit_and_close(conn, cursor):

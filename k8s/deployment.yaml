@@ -59,6 +59,11 @@ spec:
                 secretKeyRef:
                   name: smtp-api-secret
                   key: SMTP_API
+            - name: DISTANCE_API
+              valueFrom:
+                secretKeyRef:
+                  name: distance-api-secret
+                  key: DISTANCE_API
             - name: AUTH_ENDPOINT
               valueFrom:
                 secretKeyRef:
