@@ -52,7 +52,7 @@ def new_order():
     data["status"] = 1
     if data["delivery_address"]["parse"]:
         user_address_data = requests.get(
-            f"{os.environ.get("GEOLOCATE_API")}?ip={data['delivery_address']['value']}"
+            f"{os.environ.get('GEOLOCATE_API')}?ip={data['delivery_address']['value']}"
         ).json()
         data["delivery_address"] = (
             f"lat: {user_address_data['latitude']}, long: {user_address_data['longitude']}"

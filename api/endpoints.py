@@ -209,7 +209,7 @@ def send_update_email(cursor, order_id, status):
         )
         distance_data = response.json()
         requests.get(
-            f"{os.getenv('SMTP_API')}?email={customer_email}&status=Status naročila pri restavraciji {restaurant[1]} je '{status_text}'!\nYour delivery is {distance_data["duration"]} away and will arrive after travveling {distance_data["distance"]}!",
+            f"{os.getenv('SMTP_API')}?email={customer_email}&status=Status naročila pri restavraciji {restaurant[1]} je '{status_text}'!\nYour delivery is {distance_data['duration']} away and will arrive after travveling {distance_data['distance']}!",
             headers={"Content-Type": "application/json"},
         )
 
