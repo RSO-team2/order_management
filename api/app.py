@@ -113,7 +113,7 @@ def update_order_status():
     order_id = data["order_id"]
     status = data["status"]
 
-    if not order_id or not order_id.isdigit():
+    if not order_id or not status:
         return jsonify({"message": "invalid order id", "status": 400})
     
     ep.update_order_status(cursor, int(order_id), int(status))
