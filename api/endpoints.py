@@ -146,7 +146,7 @@ def send_initial_email(customer_id, restaurant_id):
     restaurant_name = next(
         (
             restaurant["name"]
-            for restaurant in restaurant_data
+            for restaurant in restaurant_data["resturant_list"]
             if restaurant["id"] == restaurant_id
         ),
         "Restaurant not found",
