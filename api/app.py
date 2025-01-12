@@ -4,6 +4,12 @@ from flask_cors import CORS, cross_origin
 import requests
 from prometheus_flask_exporter import PrometheusMetrics
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+import os
+
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -42,7 +48,7 @@ def new_order():
     data["status"] = 1
     if data["delivery_address"]["parse"]:
         user_address_data = requests.get(
-            f"https://faas-nyc1-2ef2e6cc.doserverless.co/api/v1/web/fn-3c231b12-5667-4f1f-b506-1603f4fce4a5/sample/hello?ip={data['delivery_address']['value']}"
+            f"{os.environ.get("GEOLOCATE_API")}?ip={data['delivery_address']['value']}"
         ).json()
         data["delivery_address"] = (
             f"lat: {user_address_data['latitude']}, long: {user_address_data['longitude']}"
@@ -51,6 +57,9 @@ def new_order():
         data["delivery_address"] = data["delivery_address"]["value"]
     order_id = ep.insert_order(cursor, data)
     ep.commit_and_close(conn, cursor)
+
+    ep.send_initial_email(data["customer_id"], data["restaurant_id"])
+
     return jsonify({"message": f"success, order '{order_id}' saved", "status": 200})
 
 

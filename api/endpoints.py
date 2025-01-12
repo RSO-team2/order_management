@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+import requests
 
 import psycopg2
 from dotenv import load_dotenv
@@ -118,6 +118,47 @@ def update_order_status(cursor, order_id, status):
         """,
         (status, order_id),
     )
+
+
+def send_initial_email(customer_id, restaurant_id):
+    """
+    Retrieve data for sending an email notification.
+    Args:
+        customer_id (int): The ID of the customer making the order.
+        restaurant_id (int): The ID of the restaurant fulfilling the order.
+    Returns:
+        tuple: A tuple containing the following data:
+            - restaurant_name (str): The name of the restaurant.
+            - customer_email (str): The email address of the customer.
+    """
+    response = requests.get(
+        f"{os.getenv('AUTH_ENDPOINT')}/api/getUserInfo",
+        json={"user_id": customer_id},
+        headers={"Content-Type": "application/json"}
+    )
+    customer_data = response.json()
+    customer_email = customer_data["email"]
+
+    response = requests.get(
+        f"{os.getenv('RESTAURANT_ENDPOINT')}/api/get_restaurants",
+        headers={"Content-Type": "application/json"}
+    )
+    restaurant_data = response.json()
+    restaurant_name = next(
+        (
+            restaurant["name"]
+            for restaurant in restaurant_data
+            if restaurant["id"] == restaurant_id
+        ),
+        "Restaurant not found",
+    )
+
+    requests.get(
+        f"{os.getenv('SMTP_ENDPOINT')}?email={customer_email}&status={restaurant_name} je prejelo Vaše naročilo!",
+        headers={"Content-Type": "application/json"}
+    )
+
+
 
 
 def commit_and_close(conn, cursor):
