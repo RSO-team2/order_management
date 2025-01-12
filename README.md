@@ -2,9 +2,7 @@
 
 ## Purpose and API Documentation
 
-> NOTE: Not yet finalized.
-
-[Postman API Documentation](https://documenter.getpostman.com/view/19002041/2sAYBbd8uu) 
+[Postman API Documentation](https://documenter.getpostman.com/view/26454602/2sAYQWKtfq) 
 
 The API serves as the dedicated microservice for interaction with an orders database. For more information regarding the orders database, please refer to the following repository: [Database Setup](https://github.com/RSO-team2/database_setup)
 
