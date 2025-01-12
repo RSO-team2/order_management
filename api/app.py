@@ -126,6 +126,9 @@ def update_order_status():
         return jsonify({"message": "invalid order id", "status": 400})
     
     ep.update_order_status(cursor, int(order_id), int(status))
+
+    ep.send_update_email(cursor, order_id, status)
+
     ep.commit_and_close(conn, cursor)
 
     return jsonify({"message": f"order '{order_id}' updated to '{status}'"})

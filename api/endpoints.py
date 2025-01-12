@@ -1,7 +1,7 @@
 from datetime import datetime
-import requests
 
 import psycopg2
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -133,14 +133,14 @@ def send_initial_email(customer_id, restaurant_id):
     """
     response = requests.get(
         f"{os.getenv('AUTH_ENDPOINT')}/api/getUserInfo?user_id={customer_id}",
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
     )
     customer_data = response.json()
     customer_email = customer_data["user_email"]
 
     response = requests.get(
         f"{os.getenv('RESTAURANT_ENDPOINT')}/get_restaurants",
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
     )
     restaurant_data = response.json()
     restaurant_name = next(
@@ -154,10 +154,53 @@ def send_initial_email(customer_id, restaurant_id):
 
     requests.get(
         f"{os.getenv('SMTP_API')}?email={customer_email}&status={restaurant_name} je prejelo Vaše naročilo!",
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
     )
 
 
+def send_update_email(cursor, order_id, status):
+    cursor.execute(
+        """
+        SELECT * FROM orders WHERE order_id = %s;
+        """,
+        (order_id,),
+    )
+    order = cursor.fetchone()
+    customer_id = order[1]
+    restaurant_id = order[5]
+    response = requests.get(
+        f"{os.getenv('AUTH_ENDPOINT')}/api/getUserInfo?user_id={customer_id}",
+        headers={"Content-Type": "application/json"},
+    )
+    customer_data = response.json()
+    customer_email = customer_data["user_email"]
+
+    response = requests.get(
+        f"{os.getenv('RESTAURANT_ENDPOINT')}/get_restaurants",
+        headers={"Content-Type": "application/json"},
+    )
+    restaurant_data = response.json()
+    restaurant = next(
+        (
+            restaurant
+            for restaurant in restaurant_data["resturant_list"]
+            if restaurant[0] == restaurant_id
+        ),
+        "Restaurant not found",
+    )
+
+    cursor.execute(
+        """
+        SELECT * FROM order_statuses WHERE id = %s;
+        """,
+        (status,),
+    )
+    status = cursor.fetchone()[1]
+
+    requests.get(
+        f"{os.getenv('SMTP_API')}?email={customer_email}&status=Status naročila pri restavraciji {restaurant[1]} je '{status}'!",
+        headers={"Content-Type": "application/json"},
+    )
 
 
 def commit_and_close(conn, cursor):
