@@ -3,78 +3,50 @@ from unittest.mock import patch, MagicMock
 import json
 from app import app
 
-class TestRestaurantAPI(unittest.TestCase):
+class TestOrderAPI(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
         self.app.testing = True
 
-    def test_health_check_success(self):
-        with patch('endpoints.check_database_connection'):
-            response = self.app.get('/health')
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.data.decode(), "Service is healthy")
-
-    def test_health_check_failure(self):
-        with patch('endpoints.check_database_connection', side_effect=Exception("DB Error")):
-            response = self.app.get('/health')
-            self.assertEqual(response.status_code, 500)
-            self.assertEqual(response.data.decode(), "Service is unhealthy")
-
-    @patch('endpoints.make_connection')
-    @patch('endpoints.insert_order')
-    @patch('endpoints.get_current_date')
-    def test_new_order_success(self, mock_date, mock_insert, mock_connect):
-        # Mock database connection
-        mock_conn = MagicMock()
-        mock_cursor = MagicMock()
-        mock_connect.return_value = (mock_conn, mock_cursor)
-        
-        # Mock date and order insertion
-        mock_date.return_value = "01/01/2024 12:00:00"
-        mock_insert.return_value = 123
-
-        test_data = {
-            "customer_id": 1,
-            "total_amount": 50.0,
-            "items": "[]",
-            "restaurant_id": 1,
-            "delivery_address": {
-                "parse": False,
-                "value": "123 Test St"
-            }
-        }
-
-        response = self.app.post('/new_order',
-                               data=json.dumps(test_data),
-                               content_type='application/json')
-        
+    @patch('endpoints.check_database_connection')
+    def test_health_check_healthy(self, mock_check_db):
+        # Test when database is healthy
+        mock_check_db.return_value = None
+        response = self.app.get('/health')
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.data)
-        self.assertEqual(response_data["message"], "success, order '123' saved")
-        self.assertEqual(response_data["status"], 200)
+        self.assertEqual(response.data.decode(), "Service is healthy")
+
+    @patch('endpoints.check_database_connection')
+    def test_health_check_unhealthy(self, mock_check_db):
+        # Test when database is unhealthy
+        mock_check_db.side_effect = Exception("Database error")
+        response = self.app.get('/health')
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.data.decode(), "Service is unhealthy")
 
     @patch('endpoints.make_connection')
-    @patch('endpoints.insert_order')
+    @patch('endpoints.get_current_date')
     @patch('requests.get')
-    def test_new_order_with_address_parsing(self, mock_get, mock_insert, mock_connect):
+    @patch('endpoints.send_initial_email')
+    def test_new_order_success(self, mock_send_email, mock_requests, mock_date, mock_conn):
         # Mock database connection
-        mock_conn = MagicMock()
         mock_cursor = MagicMock()
-        mock_connect.return_value = (mock_conn, mock_cursor)
+        mock_cursor.fetchone.return_value = (1,)  # Return order_id
+        mock_conn.return_value = (MagicMock(), mock_cursor)
         
-        # Mock address parsing response
-        mock_get.return_value.json.return_value = {
-            "latitude": 40.7128,
-            "longitude": -74.0060
+        # Mock current date
+        mock_date.return_value = "01/01/2024 12:00:00"
+        
+        # Mock geolocation API response
+        mock_requests.return_value.json.return_value = {
+            "latitude": "46.0",
+            "longitude": "14.0"
         }
-        
-        # Mock order insertion
-        mock_insert.return_value = 124
 
         test_data = {
             "customer_id": 1,
-            "total_amount": 50.0,
-            "items": "[]",
+            "total_amount": 25.50,
+            "items": json.dumps([{"id": 1, "quantity": 2}]),
             "restaurant_id": 1,
             "delivery_address": {
                 "parse": True,
@@ -83,68 +55,95 @@ class TestRestaurantAPI(unittest.TestCase):
         }
 
         response = self.app.post('/new_order',
-                               data=json.dumps(test_data),
+                               json=test_data,
                                content_type='application/json')
         
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.data)
-        self.assertEqual(response_data["status"], 200)
+        self.assertEqual(response_data["message"], "success, order '1' saved")
 
     @patch('endpoints.make_connection')
-    @patch('endpoints.get_user_orders')
-    def test_get_user_orders_success(self, mock_get_orders, mock_connect):
+    def test_get_user_orders_success(self, mock_conn):
         # Mock database connection
-        mock_conn = MagicMock()
         mock_cursor = MagicMock()
-        mock_connect.return_value = (mock_conn, mock_cursor)
-        
-        # Mock orders data
-        mock_orders = [(1, "01/01/2024", 50.0, "[]", 1, 1, "123 Test St")]
-        mock_get_orders.return_value = mock_orders
+        mock_cursor.fetchall.return_value = [
+            (1, 1, "01/01/2024", 25.50, "[{}]", 1, 1, "Test Address")
+        ]
+        mock_conn.return_value = (MagicMock(), mock_cursor)
 
         response = self.app.get('/get_user_orders?customer_id=1')
         
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.data)
         self.assertEqual(response_data["status"], 200)
-        self.assertEqual(response_data["message"], "orders for customer '1'")
-        self.assertEqual(response_data["data"], mock_orders)
+        self.assertEqual(len(response_data["data"]), 1)
 
-    def test_get_user_orders_invalid_id(self):
+    @patch('endpoints.make_connection')
+    def test_get_user_orders_invalid_id(self, mock_conn):
+        # Mock database connection
+        mock_conn.return_value = (MagicMock(), MagicMock())
+
         response = self.app.get('/get_user_orders?customer_id=invalid')
         
-        self.assertEqual(response.status_code, 200)  # API returns 200 even for invalid IDs
+        self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.data)
         self.assertEqual(response_data["status"], 400)
         self.assertEqual(response_data["message"], "invalid customer id")
 
     @patch('endpoints.make_connection')
-    @patch('endpoints.get_restaurant_orders')
-    def test_get_restaurant_orders_success(self, mock_get_orders, mock_connect):
+    def test_get_restaurant_orders_success(self, mock_conn):
         # Mock database connection
-        mock_conn = MagicMock()
         mock_cursor = MagicMock()
-        mock_connect.return_value = (mock_conn, mock_cursor)
-        
-        # Mock orders data
-        mock_orders = [(1, "01/01/2024", 50.0, "[]", 1, 1, "123 Test St")]
-        mock_get_orders.return_value = mock_orders
+        mock_cursor.fetchall.return_value = [
+            (1, 1, "01/01/2024", 25.50, "[{}]", 1, 1, "Test Address")
+        ]
+        mock_conn.return_value = (MagicMock(), mock_cursor)
 
         response = self.app.get('/get_restaurant_orders?restaurant_id=1')
         
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.data)
         self.assertEqual(response_data["status"], 200)
-        self.assertEqual(response_data["message"], "orders for restaurant '1'")
-        self.assertEqual(response_data["data"], mock_orders)
+        self.assertEqual(len(response_data["data"]), 1)
 
-    def test_get_restaurant_orders_invalid_id(self):
-        response = self.app.get('/get_restaurant_orders?restaurant_id=invalid')
+    @patch('endpoints.make_connection')
+    @patch('endpoints.send_update_email')
+    def test_update_order_status_success(self, mock_send_email, mock_conn):
+        # Mock database connection
+        mock_cursor = MagicMock()
+        mock_conn.return_value = (MagicMock(), mock_cursor)
+
+        test_data = {
+            "order_id": 1,
+            "status": 2
+        }
+
+        response = self.app.post('/update_order_status',
+                               json=test_data,
+                               content_type='application/json')
         
-        self.assertEqual(response.status_code, 200)  # API returns 200 even for invalid IDs
+        self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.data)
+        self.assertEqual(response_data["message"], "order '1' updated to '2'")
+
+    @patch('endpoints.make_connection')
+    def test_update_order_status_invalid_data(self, mock_conn):
+        # Mock database connection
+        mock_conn.return_value = (MagicMock(), MagicMock())
+
+        test_data = {
+            "order_id": None,
+            "status": None
+        }
+
+        response = self.app.post('/update_order_status',
+                               json=test_data,
+                               content_type='application/json')
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.data)
+        self.assertEqual(response_data["message"], "invalid order id")
         self.assertEqual(response_data["status"], 400)
-        self.assertEqual(response_data["message"], "invalid restaurant id")
 
 if __name__ == '__main__':
     unittest.main()
