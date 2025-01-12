@@ -12,7 +12,8 @@ The API serves as the dedicated microservice for interaction with an orders data
 
 1. Add a new order into the database.
 2. Retrieve all orders for a specific user from the database.
-3. > Others Not Yet Implemented
+3. Retrieve all orders for a specific restaurant
+4. Update status order
 
 
 ## Developer Setup
@@ -27,15 +28,3 @@ In order to develop and run this use-case, you have to do the following:
     - [Build and Deploy Your First Image to Your First Cluster](https://docs.digitalocean.com/products/kubernetes/getting-started/deploy-image-to-cluster/)
     - [Set up CI/CD using GitHub Actions](https://docs.digitalocean.com/products/container-registry/how-to/enable-push-to-deploy/)
 - When you have completed the steps above, the API will be deployed to your Digital Ocean account when you commit any changes and you can start using it.
-
-## Checklist
-
-Service Completion Checklist
-- [?] Documentation (specific documentation)
-  - [x] Inputs and outputs
-  - [ ] Types management
-- [?] READMEs (general documentation)
-  - [x] Purpose
-  - [?] Use-cases
-- [x] CI/CD Pipeline
-- [x] Cloud deployment
